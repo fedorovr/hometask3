@@ -12,6 +12,12 @@ class TestSquareBoard {
     fun Collection<Cell>.print() = joinToString { it.print() }
 
     @Test
+    fun testEquals() {
+        val board = createSquareBoard(10)
+        Assert.assertEquals(board.getCell(1, 1), board.getCell(1, 1))
+    }
+
+    @Test
     fun testAllCells() {
         val board = createSquareBoard(2)
         val cells = board.getAllCells().sortedWith(compareBy<Cell> { it.i }.thenBy { it.j })

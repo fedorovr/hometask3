@@ -1,4 +1,52 @@
-package _2Board
+package task
+
+import _2Board.Cell
+import _2Board.Direction
+import _2Board.GameBoard
+import _2Board.SquareBoard
+import java.time.LocalDate
+
+// 1. Решение для MyDate. Скопировать ниже содержание файла MyDate.kt после того, как прошли все тесты.
+// package _1Dates
+
+data class MyDate(val year: Int, val month: Int, val dayOfMonth: Int) : Comparable<MyDate> {
+    override fun compareTo(other: MyDate): Int =
+            (year - other.year) * 10000 + (month - other.month) * 100 + (dayOfMonth - other.dayOfMonth)
+}
+
+class DateRange(override val start: MyDate, override val endInclusive: MyDate) : ClosedRange<MyDate>, Iterable<MyDate> {
+    override fun iterator(): Iterator<MyDate> = DateIterator(this)
+    override operator fun contains(value: MyDate): Boolean = start <= value && value <= endInclusive
+}
+
+class DateIterator(val rangeDate: DateRange) : Iterator<MyDate> {
+    var currentDate: MyDate = rangeDate.start
+    override fun hasNext(): Boolean = currentDate <= rangeDate.endInclusive
+    override fun next(): MyDate {
+        val current = currentDate
+        currentDate = currentDate.nextDay()
+        return current
+    }
+}
+
+data class NTimeInterval(val timeInterval: TimeInterval, val n: Int)
+
+operator fun MyDate.rangeTo(other: MyDate) = DateRange(this, other)
+operator fun MyDate.plus(timeInterval: TimeInterval) = addTimeIntervals(timeInterval, 1)
+operator fun MyDate.plus(nTimeInterval: NTimeInterval) = addTimeIntervals(nTimeInterval.timeInterval, nTimeInterval.n)
+
+
+enum class TimeInterval {
+    DAY,
+    WEEK,
+    YEAR
+}
+
+operator fun TimeInterval.times(n: Int) = NTimeInterval(this, n)
+
+
+// 2. Решение для GameBoard. Скопировать ниже содержание файла BoardImpl.kt после того, как прошли все тесты.
+//package _2Board
 
 data class CellImpl(override val i: Int, override val j: Int) : Cell {}
 
@@ -67,3 +115,17 @@ class GameBoardImpl<T>(override val width: Int) : GameBoard<T>, SquareBoardImpl(
 
 fun createSquareBoard(width: Int): SquareBoard = SquareBoardImpl(width)
 fun <T> createGameBoard(width: Int): GameBoard<T> = GameBoardImpl(width)
+
+
+// I don't like red highlighting so:
+fun MyDate.nextDay() = addTimeIntervals(TimeInterval.DAY, 1)
+
+fun MyDate.addTimeIntervals(timeInterval: TimeInterval, number: Int): MyDate {
+    val localDate = LocalDate.of(year, month, dayOfMonth)
+    val newDate = when (timeInterval) {
+        TimeInterval.DAY -> localDate.plusDays(number.toLong())
+        TimeInterval.WEEK -> localDate.plusWeeks(number.toLong())
+        TimeInterval.YEAR -> localDate.plusYears(number.toLong())
+    }
+    return MyDate(newDate.year, newDate.monthValue, newDate.dayOfMonth)
+}
